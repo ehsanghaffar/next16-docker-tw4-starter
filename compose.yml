@@ -1,11 +1,31 @@
 services:
-  next16-app:
+  app:
+    # Development service (bind-mounts the source for fast iteration)
     build:
       context: .
       dockerfile: Dockerfile
-      target: runner
+      target: dev
     ports:
       - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app:cached
+      - /app/node_modules
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+
+  web:
+    # Production service (uses the production image from Dockerfile)
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
-    command: ["node", "server.js"]
+    restart: unless-stopped
